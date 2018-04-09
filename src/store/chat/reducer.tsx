@@ -1,16 +1,12 @@
 import * as Actions from './action';
+import { ChatState } from './types';
 
-export class AdvertState {
-    messages: Array<any>;
-    channel: any;
-}
 export const initialState = {
     messages: [],
-    channel: {
-    }
+    channel: {}
 };
 
-export default function AdvertReducer(state: AdvertState = initialState, action: any): AdvertState {
+export default function chatReducer(state: ChatState = initialState, action: any): ChatState {
     console.log('Chat reducer', action, state, );
     switch (action.type) {
         case Actions.GET_ALL_MESSAGES_FROM_CHANNEL:

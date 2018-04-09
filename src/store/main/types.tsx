@@ -21,6 +21,7 @@ export type  TMapStateToProps = {
 export type TComponentSate = TMapStateToProps & {
     newChannelName: string;
     newName: string;
+    newEmail: string;
     dropdownOpen: boolean;
     modalProfile: boolean;
     modalCreateChannel: boolean;
@@ -49,3 +50,17 @@ export const dynamicPropTypes = {
     chats: PropTypes.array,
     getContents: PropTypes.func
 };
+
+export class MainState {
+    advertId: number;
+    user: {
+        id: string,
+        nickname: string,
+    };
+    chats: Array<any> = [];
+    usersOnline: Array<{
+        id: string,
+        nickname: string,
+        email?: string|undefined
+    }>;
+}

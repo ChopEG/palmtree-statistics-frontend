@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Component } from 'react';
 import * as ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
+import * as md5 from 'md5';
 import {
     Form,
     InputGroup,
@@ -9,7 +10,6 @@ import {
     Card,
     CardHeader,
     CardFooter,
-    // CardBody,
     Nav, NavItem, NavLink,
 } from 'reactstrap';
 import {
@@ -19,78 +19,39 @@ import {
     TMapStateToProps,
     TPassedProps,
     TProps
-} from './own_props';
-import socketService from '../../services/socket.service';
-import * as Selectors from './selectors';
+} from '../store/chat/types';
+import * as Selectors from '../store/chat/selectors';
+import SocketService from '../services/socket.service';
 
-import { getAllMessagesFromChannel, receiveNewMessage } from './action';
+import { getAllMessagesFromChannel, receiveNewMessage } from '../store/chat/action';
 
 class ChannelPage extends Component<TProps, TComponentSate> {
 
     static propTypes = dynamicPropTypes;
-    protected socket: any;
+    protected socket: SocketService;
     protected messagesContainer: any;
 
-    protected socketListeners: Array<{event: string, callback: (data: any) => any}> = [
-        {
-            event: socketService.GET_ALL_MESSAGES_FROM_CHANNEL_ANSWER,
-            callback: (data: any) => {
-                this.props.getAllMessagesFromChannel(data);
-                this.scrollToBottom();
-            }
-        },
-        {
-            event: socketService.POST_MESSAGE_ECHO,
-            callback: (data: any) => {
-                this.props.receiveNewMessage(data);
-                this.scrollToBottom();
-            }
-        },
-    ];
-
-    constructor(props: TProps) {
+    public constructor(props: TProps) {
         super(props);
 
         this.state = {
             ...this.state,
             writeMessage: '',
         };
+
+        this.socket = SocketService.getInst();
+        this.refreshMessages();
     }
 
     /**
      * Get all message from channel
      */
     protected refreshMessages = (): void => {
-        this.socket.emit(socketService.GET_ALL_MESSAGES_FROM_CHANNEL, {
-            chat_id: this.props.channel.id
-        });
+        this.socket.refreshMessages(this.props.channel.id);
     }
 
-    /**
-     * Set actions for socket event
-     */
-    protected initSocketConnect = (): void => {
-        // get socket
-        this.socket = socketService.getSocketConnection(this.props.user);
-
-        // subscribe on "get all messages from channel" events
-        this.socketListeners.map( (e: {event: string, callback: (data: any) => any}) => this.socket.on(e.event, e.callback) );
-
-        // init requests
-        this.refreshMessages();
-    }
-
-    protected unInitSocketConnect = (): void => {
-        // subscribe on "get all messages from channel" events
-        this.socketListeners.map( (e: {event: string, callback: (data: any) => any}) => this.socket.removeListener(e.event, e.callback) );
-    }
-
-    componentDidMount() {
-        this.initSocketConnect();
-    }
-
-    componentWillUnmount() {
-        this.unInitSocketConnect();
+    public componentDidMount() {
+        this.scrollToBottom();
     }
 
     /**
@@ -98,10 +59,10 @@ class ChannelPage extends Component<TProps, TComponentSate> {
      * @param e
      */
     protected postMessage = (e: any): void => {
-        this.socket.emit(socketService.POST_MESSAGE, {
-            chat_id: this.props.channel.id,
-            message: this.state.writeMessage
-        });
+        this.socket.postMessage(
+            this.props.channel.id,
+            this.state.writeMessage
+        );
         this.setState({writeMessage: ''});
         e.preventDefault();
     }
@@ -119,7 +80,7 @@ class ChannelPage extends Component<TProps, TComponentSate> {
      */
     protected scrollToBottom = (): void => {
         const messagesContainer = ReactDOM.findDOMNode(this.messagesContainer);
-        if ( messagesContainer ) {
+        if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     }
@@ -138,7 +99,9 @@ class ChannelPage extends Component<TProps, TComponentSate> {
      * @param prevState
      * @param snapshot
      */
-    componentDidUpdate(prevProps: any, prevState: any, snapshot: any) {
+    public componentDidUpdate(prevProps: any, prevState: any, snapshot: any) {
+        this.scrollToBottom();
+
         if (this.props.channel !== prevProps.channel) {
             this.refreshMessages();
             this.setState({writeMessage: ''});
@@ -149,7 +112,7 @@ class ChannelPage extends Component<TProps, TComponentSate> {
      * Render channel page
      * @returns {any}
      */
-    render() {
+    public render() {
         return (
             <Card className={'channel_container grow-1'}>
                 <CardHeader>
@@ -162,7 +125,8 @@ class ChannelPage extends Component<TProps, TComponentSate> {
                                 return (
                                     <NavItem key={'message_' + num} className={'message_container mb-2'}>
                                         <NavLink className={'d-flex'}>
-                                            <div className={'avatar'}>0_o</div>
+
+                                            <img className={'avatar'} src={'https://www.gravatar.com/avatar/' + (message.user.email ? md5(message.user.email) : '00000000000000000000000000000000')}/>
                                             <div className={'message_body d-flex flex-column grow-1'}>
                                                 <span className={'username m-0'}>
                                                     {message.user.nickname}

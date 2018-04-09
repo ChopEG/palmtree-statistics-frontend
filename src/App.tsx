@@ -1,7 +1,7 @@
 // import './App.scss';
 import * as React from 'react';
-import MainPage from './components/main';
-import ChatPage from './components/chat';
+import MainPage from './containers/MainPage';
+import ChatPage from './containers/ChannelPage';
 
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 

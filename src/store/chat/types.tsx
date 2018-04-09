@@ -29,3 +29,8 @@ export const dynamicPropTypes = {
     user: PropTypes.any,
     getAllMessagesFromChannel: PropTypes.func
 };
+
+export class ChatState {
+    messages: Array<any>;
+    channel: any;
+}

@@ -1,18 +1,9 @@
-// import { reducers, ApplicationState } from './store';
-// import { createStore, applyMiddleware, Store } from 'redux';
-// import { composeWithDevTools } from 'redux-devtools-extension';
-// import { routerMiddleware } from 'react-router-redux';
-// import { History } from 'history';
-
-// import { composeWithDevTools } from "redux-devtools-extension";
 import { ApplicationState, reducers } from './index';
 import {
     // applyMiddleware,
     createStore,
     Store
 } from 'redux';
-// import { History } from "history";
-// import { routerMiddleware } from "react-router-redux";
 
 export default function configureStore(
     // history: History,

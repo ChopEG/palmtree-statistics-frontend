@@ -5,42 +5,22 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-// import 'bootstrap/dist/css/bootstrap.css';
 import './styles/index.css';
 import { Provider } from 'react-redux';
-// import { combineReducers, createStore } from 'redux';
-// import mainReducer from './components/main/reducer';
-// import chatReducer from './components/chat/reducer';
 import SocketService from './services/socket.service';
 import configureStore from './store/configureStore';
-// import { initialChatState } from "./store/chat/reducer";
-// import { initialMainState } from "./store/main/reducer";
+import { initialState as channelInitialState } from './store/channel/reducer';
+import { initialState as mainInitialState } from './store/main/reducer';
+import { initialState as helloComponentInitialState } from './store/helloComponent/reducer';
 
-let id = 'user_' + (Math.floor(Math.random() * (1000001)) + 1000000);
 const store = configureStore({
-    chatStore: {
-        messages: [],
-        channel: {}
-    },
-    mainStore:  {
-        advertId: 0,
-        user: {
-            id: id,
-            nickname: id,
-        },
-        chats: [],
-        usersOnline: []
-    },
+    channelStore: channelInitialState,
+    mainStore: mainInitialState,
+    helloComponentStore: helloComponentInitialState,
 });
 SocketService._store = store;
-SocketService.getInst().getSocketConnection();
+SocketService.getInst().getSocketConnection(mainInitialState.user);
 
-// let red = combineReducers({mainStore: mainReducer, chatStore: chatReducer});
-
-// const store = createStore(combineReducers({
-//     mainStore: mainReducer,
-//     chatStore: chatReducer
-// }));
 ReactDOM.render(
     <Provider store={store}>
         <App />

@@ -4,10 +4,11 @@ import {
     addUsersOnline, createChannel,
     getAllChannels,
     getNewName, getUsersOnline,
-    userConnectToChatEcho,
-    userDisconnectFromChatEcho
+    userConnectToChannelEcho,
+    userDisconnectFromChannelEcho
 } from '../store/main/action';
-import { getAllMessagesFromChannel, receiveNewMessage } from '../store/chat/action';
+import { getAllMessagesFromChannel, receiveNewMessage } from '../store/channel/action';
+import User from '../models/User';
 
 class SocketService {
     public static self: any = null;
@@ -27,10 +28,10 @@ class SocketService {
     public readonly POST_MESSAGE: string = 'POST_MESSAGE';
     public readonly POST_MESSAGE_ECHO: string = 'POST_MESSAGE_ECHO';
 
-    public readonly USER_CONNECT_TO_CHAT: string = 'USER_CONNECT_TO_CHAT';
-    public readonly USER_CONNECT_TO_CHAT_ECHO: string = 'USER_CONNECT_TO_CHAT_ECHO';
-    public readonly USER_DISCONNECT_FROM_CHAT: string = 'USER_DISCONNECT_FROM_CHAT';
-    public readonly USER_DISCONNECT_FROM_CHAT_ECHO: string = 'USER_DISCONNECT_FROM_CHAT_ECHO';
+    public readonly USER_CONNECT_TO_CHANNEL: string = 'USER_CONNECT_TO_CHANNEL';
+    public readonly USER_CONNECT_TO_CHANNEL_ECHO: string = 'USER_CONNECT_TO_CHANNEL_ECHO';
+    public readonly USER_DISCONNECT_FROM_CHANNEL: string = 'USER_DISCONNECT_FROM_CHANNEL';
+    public readonly USER_DISCONNECT_FROM_CHANNEL_ECHO: string = 'USER_DISCONNECT_FROM_CHANNEL_ECHO';
 
     public readonly USER_SET_NEW_NAME: string = 'USER_SET_NEW_NAME';
     public readonly USER_SET_NEW_NAME_ANSWER: string = 'USER_SET_NEW_NAME_ANSWER';
@@ -56,12 +57,13 @@ class SocketService {
         return SocketService._store;
     }
 
-    public getSocketConnection = (user?: any): SocketIOClientStatic | null => {
+    public getSocketConnection = (user?: User): SocketIOClientStatic | null => {
         if (this.socket) {
             return this.socket;
         }
         if (!user) {
-            user = {};
+            // TODO mb use AUTH
+            user = User.getRandomUser();
         }
         if (!user.id) {
             user.id = user.nickname || this.gerRandomUserId();
@@ -81,8 +83,8 @@ class SocketService {
 
         this.socket.on(this.CHANNEL_CREATE_ECHO, (data: any) => this.store().dispatch(createChannel(data)));
         this.socket.on(this.GET_ALL_CHANNELS_ANSWER, (data: any) => this.store().dispatch(getAllChannels(data)));
-        this.socket.on(this.USER_CONNECT_TO_CHAT_ECHO, (data: any) => this.store().dispatch(userConnectToChatEcho(data)));
-        this.socket.on(this.USER_DISCONNECT_FROM_CHAT_ECHO, (data: any) => this.store().dispatch(userDisconnectFromChatEcho(data)));
+        this.socket.on(this.USER_CONNECT_TO_CHANNEL_ECHO, (data: any) => this.store().dispatch(userConnectToChannelEcho(data)));
+        this.socket.on(this.USER_DISCONNECT_FROM_CHANNEL_ECHO, (data: any) => this.store().dispatch(userDisconnectFromChannelEcho(data)));
         this.socket.on(this.USER_SET_NEW_NAME_ANSWER, (data: any) => this.store().dispatch(getNewName(data)));
         this.socket.on(this.USERS_ONLINE_ANSWER, (data: any) => this.store().dispatch(getUsersOnline(data)));
         this.socket.on(this.USER_ONLINE_ECHO, (data: any) => this.store().dispatch(addUsersOnline(data)));
@@ -98,27 +100,27 @@ class SocketService {
         this.socket.emit(this.GET_ALL_CHANNELS);
     }
 
-    public pickChannel(chatId: any): void {
-        this.socket.emit(this.USER_CONNECT_TO_CHAT, {
-            chat_id: chatId
+    public pickChannel(channelId: any): void {
+        this.socket.emit(this.USER_CONNECT_TO_CHANNEL, {
+            channel_id: channelId
         });
     }
 
-    public disconnectFromChat = (id: any): void => {
-        this.socket.emit(this.USER_DISCONNECT_FROM_CHAT, {
-            chat_id: id
+    public disconnectFromChannel = (id: any): void => {
+        this.socket.emit(this.USER_DISCONNECT_FROM_CHANNEL, {
+            channel_id: id
         });
     }
 
     public refreshMessages = (id: any): void => {
         this.socket.emit(this.GET_ALL_MESSAGES_FROM_CHANNEL, {
-            chat_id: id
+            channel_id: id
         });
     }
 
     public postMessage = (id: any, writeMessage: any): void => {
         this.socket.emit(this.POST_MESSAGE, {
-            chat_id: id,
+            channel_id: id,
             message: writeMessage
         });
     }

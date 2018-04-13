@@ -1,7 +1,6 @@
-// import './App.scss';
 import * as React from 'react';
 import MainPage from './containers/MainPage';
-import ChatPage from './containers/ChannelPage';
+import ChannelPage from './containers/ChannelPage';
 
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
@@ -11,7 +10,7 @@ class App extends React.Component {
         <div className="App">
             <Router>
                 <Switch>
-                    <Route path="/chat/:name" component={ChatPage}/>
+                    <Route path="/channel/:name" component={ChannelPage}/>
                     <Route path="/" component={MainPage}/>
                 </Switch>
             </Router>

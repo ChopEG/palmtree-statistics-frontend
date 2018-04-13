@@ -2,9 +2,7 @@
   max-height: 100vh;
   .card-body {
 
-    //> div {
-      overflow-y: auto;
-    //}
+    overflow-y: auto;
 
     .message_container {
 
@@ -26,8 +24,8 @@
           font-weight: bold;
         }
 
-        //background: #fff6d1;
       }
+
     }
   }
 }

@@ -11,8 +11,8 @@ import {
     createChannel,
     onChangeName,
     getAllChannels,
-    userConnectToChatEcho,
-    userDisconnectFromChatEcho,
+    userConnectToChannelEcho,
+    userDisconnectFromChannelEcho,
     getNewName,
     getUsersOnline,
     addUsersOnline,
@@ -20,6 +20,7 @@ import {
 } from '../store/main/action';
 import * as Selectors from '../store/main/selectors';
 import ChannelPage from './ChannelPage';
+import HelloComponent from './HelloComponent';
 import { Component } from 'react';
 import {
     dynamicPropTypes,
@@ -45,7 +46,7 @@ class MainPage extends Component<TProps, TComponentSate> {
             user: props.user,
             dropdownOpen: false,
             newName: this.props.user.nickname,
-            chats: [],
+            channels: [],
             currentChannel: null,
             modalProfile: false,
             modalCreateChannel: false
@@ -55,15 +56,12 @@ class MainPage extends Component<TProps, TComponentSate> {
         this.socket.getAllChannels();
     }
 
-    protected createNewChannel = (event: any): void => {
+    protected createNewChannel = (): void => {
 
         this.setState({
             newChannelName: ''
         });
         this.socket.createChannel(this.state.newChannelName);
-        this.toggleModalCreateChannel();
-
-        event.preventDefault();
     }
 
     protected setNewChannel = ({target}: any): void => {
@@ -111,36 +109,36 @@ class MainPage extends Component<TProps, TComponentSate> {
 
     protected pickChannel = ({target}: any): void => {
 
-        let id = target.getAttribute('current-chat-id');
-        let channel = this.props.chats.find(chat => (chat.id.toString() === id.toString()));
+        let id = target.getAttribute('current-channel-id');
+        let channelPick = this.props.channels.find(channel => (channel.id.toString() === id.toString()));
 
         if ( this.state.currentChannel ) {
-            this.socket.disconnectFromChat(this.state.currentChannel.id);
+            this.socket.disconnectFromChannel(this.state.currentChannel.id);
         }
 
         this.setState({
-            currentChannel: (channel) ? channel : null
+            currentChannel: (channelPick) ? channelPick : null
         });
 
-        if (channel) {
-            this.socket.pickChannel(channel.id);
+        if (channelPick) {
+            this.socket.pickChannel(channelPick.id);
         }
     }
 
     protected filterChannels = ({target}: any): void => {
-        this.props.chats.forEach((e) => {
+        this.props.channels.forEach((e) => {
             e.show = e.name.toLowerCase().indexOf(target.value.toLowerCase()) > -1;
         });
-        this.setState({chats: this.props.chats});
+        this.setState({channels: this.props.channels});
     }
 
     public render() {
         return (
             <div className={'main_container d-flex flex-row grow-1'}>
                 <Modal isOpen={this.state.modalProfile} toggle={this.toggleModalProfile}>
-                    <ModalHeader toggle={this.toggleModalProfile}>Profile</ModalHeader>
-                    <ModalBody>
-                        <Form onSubmit={this.applyNewName}>
+                    <Form onSubmit={(e: any) => {this.applyNewName(); this.toggleModalProfile(); e.preventDefault(); }}>
+                        <ModalHeader toggle={this.toggleModalProfile}>Profile</ModalHeader>
+                        <ModalBody>
                             <FormGroup>
                                 <Label for="nickname">Nickname</Label>
                                 <Input type="text" name="nickname" id="nickname" defaultValue={this.state.newName} onChange={this.setNewName}/>
@@ -152,26 +150,30 @@ class MainPage extends Component<TProps, TComponentSate> {
                                     Enter email address for user gravatar image
                                 </FormText>
                             </FormGroup>
-                        </Form>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={(e: any) => {this.applyNewName(); return this.toggleModalProfile(); }}>Save</Button>
-                    </ModalFooter>
+                        </ModalBody>
+                        <ModalFooter>
+                            <FormGroup>
+                                <Button color="primary" type={'submit'}>Save</Button>
+                            </FormGroup>
+                        </ModalFooter>
+                    </Form>
                 </Modal>
 
                 <Modal isOpen={this.state.modalCreateChannel} toggle={this.toggleModalCreateChannel}>
-                    <ModalHeader toggle={this.toggleModalCreateChannel}>Create new channel</ModalHeader>
-                    <ModalBody>
-                        <Form>
+                    <Form onSubmit={(e: any) => { this.createNewChannel(); this.toggleModalCreateChannel(); e.preventDefault(); }}>
+                        <ModalHeader toggle={this.toggleModalCreateChannel}>Create new channel</ModalHeader>
+                        <ModalBody>
                             <FormGroup>
                                 <Label for="cname">Channel name</Label>
                                 <Input type="text" name="cname" defaultValue={this.state.newChannelName} onChange={this.setNewChannel}/>
                             </FormGroup>
-                        </Form>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={this.createNewChannel}>Create</Button>
-                    </ModalFooter>
+                        </ModalBody>
+                        <ModalFooter>
+                            <FormGroup>
+                                <Button color="primary" type={'submit'}>Create</Button>
+                            </FormGroup>
+                        </ModalFooter>
+                    </Form>
                 </Modal>
 
                 <div className={'channels_list_container d-flex position-relative flex-column'}>
@@ -198,13 +200,13 @@ class MainPage extends Component<TProps, TComponentSate> {
                             </NavLink>
                         </NavItem>
                         {
-                            this.props.chats.filter((chat) => !chat.isDirected && (chat.show === undefined || chat.show)).map((chat: any, num: number): any => {
+                            this.props.channels.filter((channel) => !channel.isDirected && (channel.show === undefined || channel.show)).map((channel: any, num: number): any => {
                                 return (
-                                    <NavItem key={'MainPage_chat_' + num}>
-                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-chat-id={chat.id} onClick={this.pickChannel} active={this.state.currentChannel && chat.id === this.state.currentChannel.id}>
-                                            # {chat.name} <Badge pill={true}>
+                                    <NavItem key={'MainPage_channel_' + num}>
+                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-channel-id={channel.id} onClick={this.pickChannel} active={this.state.currentChannel && channel && channel.id === this.state.currentChannel.id}>
+                                            # {channel.name} <Badge pill={true}>
                                             {
-                                                (chat && chat.users) ? chat.users.length : '0'
+                                                (channel && channel.users) ? channel.users.length : '0'
                                             }
                                         </Badge>
                                         </NavLink>
@@ -219,13 +221,13 @@ class MainPage extends Component<TProps, TComponentSate> {
                             <span>Direct Message</span>
                         </NavLink>
                         {
-                            this.props.chats.filter((chat) => chat.isDirected && (chat.show === undefined || chat.show)).map((chat: any, num: number): any => {
+                            this.props.channels.filter((channel) => channel.isDirected && (channel.show === undefined || channel.show)).map((channel: any, num: number): any => {
                                 return (
-                                    <NavItem key={'MainPage_chat_' + num}>
-                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-chat-id={chat.id} onClick={this.pickChannel}>
-                                            * {chat.name} <Badge pill={true}>
+                                    <NavItem key={'MainPage_channel_' + num}>
+                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-channel-id={channel.id} onClick={this.pickChannel}>
+                                            * {channel.name} <Badge pill={true}>
                                             {
-                                                (chat && chat.users) ? chat.users.length : '0'
+                                                (channel && channel.users) ? channel.users.length : '0'
                                             }
                                         </Badge>
                                         </NavLink>
@@ -243,7 +245,7 @@ class MainPage extends Component<TProps, TComponentSate> {
                             this.props.usersOnline.map((user: any, num: number): any => {
                                 return (
                                     <NavItem key={'MainPage_OnlineUser_' + num}>
-                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-chat-id={user.id} onClick={this.pickChannel}>
+                                        <NavLink className={'d-flex justify-content-between align-items-center'} current-channel-id={user.id} onClick={this.pickChannel}>
                                             -> {user.nickname}
                                         </NavLink>
                                     </NavItem>
@@ -252,10 +254,17 @@ class MainPage extends Component<TProps, TComponentSate> {
                         }
                     </Nav>
                 </div>
-                <div className={'chat_container d-flex position-relative flex-column'}>
+
+                <div className={'channel_container d-flex position-relative flex-column'}>
                     {
-                        this.state.currentChannel && this.state.user
-                        && <ChannelPage channel={this.state.currentChannel} user={this.state.user}/>
+                        (() => {
+                                if ( this.state.currentChannel && this.state.user ) {
+                                    return (<ChannelPage channel={this.state.currentChannel} user={this.state.user}/>);
+                                } else {
+                                    return ( <HelloComponent />);
+                                }
+                            }
+                        )()
                     }
                 </div>
             </div>
@@ -267,14 +276,14 @@ export default connect<TMapStateToProps, TDispatchToPropsParams, TPassedProps>(
     (state) => ({
         user: Selectors.user(state),
         usersOnline: Selectors.usersOnline(state),
-        chats: Selectors.chats(state),
+        channels: Selectors.channels(state),
     }),
     {
         onChangeName,
         createChannel,
         getAllChannels,
-        userConnectToChatEcho,
-        userDisconnectFromChatEcho,
+        userConnectToChannelEcho,
+        userDisconnectFromChannelEcho,
         getNewName,
         getUsersOnline,
         addUsersOnline,

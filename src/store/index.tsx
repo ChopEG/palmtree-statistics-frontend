@@ -1,20 +1,19 @@
 import { combineReducers, Reducer } from 'redux';
-import chatReducer from './chat/reducer';
+import channelReducer from './channel/reducer';
 import mainReducer from './main/reducer';
+import helloComponentReducer from './helloComponent/reducer';
 import { MainState } from './main/types';
-import { ChatState } from './chat/types';
+import { ChannelState } from './channel/types';
+import { HelloComponentState } from './helloComponent/types';
 
 export interface ApplicationState {
-    chatStore: ChatState;
+    channelStore: ChannelState;
     mainStore: MainState;
+    helloComponentStore: HelloComponentState;
 }
-
-// export default createStore(combineReducers({
-//     mainStore: mainReducer,
-//     chatStore: chatReducer
-// }));
 
 export const reducers: Reducer<ApplicationState> = combineReducers<ApplicationState>({
     mainStore: mainReducer,
-    chatStore: chatReducer,
+    channelStore: channelReducer,
+    helloComponentStore: helloComponentReducer,
 });

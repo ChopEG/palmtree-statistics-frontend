@@ -1,14 +1,13 @@
 import * as Actions from './action';
 import { MainState } from './types';
+import Auth from '../../services/auth.service';
+import User from '../../models/User';
 
-let id = 'user_' + (Math.floor(Math.random() * (1000001)) + 1000000);
+let savedUser: User | null = Auth.getUser();
+
 export const initialState = {
-    advertId: 0,
-    user: {
-        id: id,
-        nickname: id,
-    },
-    chats: [],
+    user: (savedUser !== null) ? savedUser : Auth.initUser(),
+    channels: [],
     usersOnline: []
 };
 
@@ -25,45 +24,49 @@ export default function mainReducer(state: MainState = initialState, action: any
 
         case Actions.CREATE_CHANNEL_EVENT:
             let channel = JSON.parse(action.data);
-            let newChats = [...state.chats, channel];
+            let newChannels = [...state.channels, channel];
             return {
                 ...state,
-                chats: newChats
+                channels: newChannels
             };
 
         case Actions.GET_ALL_CHANNELS:
             return {
                 ...state,
-                chats: JSON.parse(action.data)
+                channels: JSON.parse(action.data)
             };
 
-        case Actions.USER_CONNECT_TO_CHAT_ECHO:
-            let {user: user1, chat: chat1} = JSON.parse(action.data);
-            let channel1 = state.chats.find(ch => ch.id === chat1.id);
-            if (!channel1.users.find((u: any) => u.id === user1.id)) {
+        case Actions.USER_CONNECT_TO_CHANNEL_ECHO:
+            let {user: user1, channel: dataChannel1}: any = JSON.parse(action.data);
+            let channel1 = state.channels.find(ch => ch.id === dataChannel1.id);
+            if (channel1 && !channel1.users.find((u: any) => u.id === user1.id)) {
                 channel1.users.push(user1);
             }
-            let newChats1 = [...state.chats];
+            let newChannels1 = [...state.channels];
             return {
                 ...state,
-                chats: newChats1
+                channels: newChannels1
             };
 
-        case Actions.USER_DISCONNECT_FROM_CHAT_ECHO:
-            let {user: user2, chat: chat2} = JSON.parse(action.data);
-            let channel2 = state.chats.find(ch => ch.id === chat2.id);
-            channel2.users = channel2.users.filter((u: any) => u.id !== user2.id);
-            let newChats2 = [...state.chats];
+        case Actions.USER_DISCONNECT_FROM_CHANNEL_ECHO:
+            let {user: user2, channel: dataChannel2}: any = JSON.parse(action.data);
+            let channel2 = state.channels.find(ch => ch.id === dataChannel2.id);
+            if (channel2) {
+                channel2.users = channel2.users.filter((u: any) => u.id !== user2.id);
+            }
+            let newChannels2 = [...state.channels];
             return {
                 ...state,
-                chats: newChats2
+                channels: newChannels2
             };
 
         case Actions.USER_SET_NEW_NAME_ANSWER:
             console.log('JSON.parse(action.data)', JSON.parse(action.data));
+            let user = new User(JSON.parse(action.data));
+            Auth.setUser(user);
             return {
                 ...state,
-                user: JSON.parse(action.data)
+                user: user
             };
 
         case Actions.USERS_ONLINE_ANSWER:

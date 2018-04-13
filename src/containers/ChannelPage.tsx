@@ -19,11 +19,11 @@ import {
     TMapStateToProps,
     TPassedProps,
     TProps
-} from '../store/chat/types';
-import * as Selectors from '../store/chat/selectors';
+} from '../store/channel/types';
+import * as Selectors from '../store/channel/selectors';
 import SocketService from '../services/socket.service';
 
-import { getAllMessagesFromChannel, receiveNewMessage } from '../store/chat/action';
+import { getAllMessagesFromChannel, receiveNewMessage, updateCurrentChannel } from '../store/channel/action';
 
 class ChannelPage extends Component<TProps, TComponentSate> {
 
@@ -106,6 +106,7 @@ class ChannelPage extends Component<TProps, TComponentSate> {
             this.refreshMessages();
             this.setState({writeMessage: ''});
         }
+        this.props.updateCurrentChannel(this.props.channel);
     }
 
     /**
@@ -130,7 +131,7 @@ class ChannelPage extends Component<TProps, TComponentSate> {
                                             <div className={'message_body d-flex flex-column grow-1'}>
                                                 <span className={'username m-0'}>
                                                     {message.user.nickname}
-                                                    <small className={'text-muted ml-2'}>{message.timePrity}</small>
+                                                    <small className={'text-muted ml-2'}>{message.timePretty}</small>
                                                 </span>
                                                 <span className={'message_text'}>{message.text}</span>
                                             </div>
@@ -156,10 +157,12 @@ class ChannelPage extends Component<TProps, TComponentSate> {
 export default connect<TMapStateToProps, TDispatchToPropsParams, TPassedProps>(
     (state) => ({
         messages: Selectors.messages(state),
+        currentChannel: Selectors.currentChannel(state),
         writeMessage: Selectors.writeMessage(state),
     }),
     {
         getAllMessagesFromChannel,
         receiveNewMessage,
+        updateCurrentChannel,
     }
 )(ChannelPage);

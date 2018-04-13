@@ -1,10 +1,15 @@
 // My Bootstrap configuration
 @import 'custom_bootstrap';
 
+// My mixins
+@import 'mixins';
+
 // Bootstrap library
 @import '../../node_modules/bootstrap/scss/bootstrap';
 
+// Styling
 @import 'common';
 @import 'app';
 @import 'main';
-@import 'chat';
+@import 'channel';
+@import 'hello_component';

@@ -1,21 +1,15 @@
 import * as PropTypes from 'prop-types';
+import Channel from '../../models/Channel';
+import User from '../../models/User';
 
 // Prop Types
 export type TPassedProps = {
 };
 
 export type  TMapStateToProps = {
-    chats: Array<any>;
-    user: {
-        id: string,
-        nickname: string,
-        email: string
-    }
-    usersOnline: Array<{
-        id: string,
-        nickname: string,
-        email?: string,
-    }>
+    channels: Array<Channel>;
+    user: User
+    usersOnline: Array<User>
 };
 
 export type TComponentSate = TMapStateToProps & {
@@ -25,15 +19,15 @@ export type TComponentSate = TMapStateToProps & {
     dropdownOpen: boolean;
     modalProfile: boolean;
     modalCreateChannel: boolean;
-    currentChannel: any;
+    currentChannel: Channel|null;
 };
 
 export type TDispatchToPropsParams = {
     createChannel: (data: any) => any;
     onChangeName: (name: string) => any;
     getAllChannels: (data: any)  => any;
-    userConnectToChatEcho: (data: any)  => any;
-    userDisconnectFromChatEcho: (data: any)  => any;
+    userConnectToChannelEcho: (data: any)  => any;
+    userDisconnectFromChannelEcho: (data: any)  => any;
     getNewName: (data: any)  => any;
     getUsersOnline: (data: any)  => any;
     addUsersOnline: (data: any)  => any;
@@ -47,20 +41,12 @@ export type TProps = TComponentSate & TDispatchToPropsParams & TPassedProps;
 export const dynamicPropTypes = {
     nickname: PropTypes.string,
     newChannelName: PropTypes.string,
-    chats: PropTypes.array,
+    channels: PropTypes.array,
     getContents: PropTypes.func
 };
 
 export class MainState {
-    advertId: number;
-    user: {
-        id: string,
-        nickname: string,
-    };
-    chats: Array<any> = [];
-    usersOnline: Array<{
-        id: string,
-        nickname: string,
-        email?: string|undefined
-    }>;
+    user: User;
+    channels: Array<Channel> = [];
+    usersOnline: Array<User>;
 }

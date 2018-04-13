@@ -1,8 +1,8 @@
 export const CHANGE_NAME_EVENT = '@main/CHANGE_NAME_EVENT';
 export const CREATE_CHANNEL_EVENT = '@main/CREATE_CHANNEL_EVENT';
 export const GET_ALL_CHANNELS = '@main/GET_ALL_CHANNELS';
-export const USER_CONNECT_TO_CHAT_ECHO = '@main/USER_CONNECT_TO_CHAT_ECHO';
-export const USER_DISCONNECT_FROM_CHAT_ECHO = '@main/USER_DISCONNECT_FROM_CHAT_ECHO';
+export const USER_CONNECT_TO_CHANNEL_ECHO = '@main/USER_CONNECT_TO_CHANNEL_ECHO';
+export const USER_DISCONNECT_FROM_CHANNEL_ECHO = '@main/USER_DISCONNECT_FROM_CHANNEL_ECHO';
 export const USER_SET_NEW_NAME_ANSWER = '@main/USER_SET_NEW_NAME_ANSWER';
 export const USERS_ONLINE_ANSWER = '@main/USERS_ONLINE_ANSWER';
 export const USER_ONLINE_ECHO = '@main/USER_ONLINE_ECHO';
@@ -20,12 +20,12 @@ export const getAllChannels = (data: any): any => {
     return {type: GET_ALL_CHANNELS, data: data};
 };
 
-export const userConnectToChatEcho = (data: any): any => {
-    return {type: USER_CONNECT_TO_CHAT_ECHO, data: data};
+export const userConnectToChannelEcho = (data: any): any => {
+    return {type: USER_CONNECT_TO_CHANNEL_ECHO, data: data};
 };
 
-export const userDisconnectFromChatEcho  = (data: any): any => {
-    return {type: USER_DISCONNECT_FROM_CHAT_ECHO, data: data};
+export const userDisconnectFromChannelEcho  = (data: any): any => {
+    return {type: USER_DISCONNECT_FROM_CHANNEL_ECHO, data: data};
 };
 
 export const getNewName = (data: any): any => {
